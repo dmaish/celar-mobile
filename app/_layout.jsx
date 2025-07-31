@@ -1,0 +1,15 @@
+import { Stack } from "expo-router";
+import Toast from 'react-native-toast-message';
+
+export default function RootLayout() {
+  return (
+    <>
+      <Stack>
+          <Stack.Screen name="login" options={{ title: "Login" }} />
+          <Stack.Screen name="signup" options={{ title: "Signup" }} />
+      </Stack>
+      <Toast/>
+    </>
+  )
+        
+}

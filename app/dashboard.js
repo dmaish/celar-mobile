@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import Toast from 'react-native-toast-message';
 import { View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getTransactions } from '../services/api';
+import { USER_ROLE } from '../utils/constants';
 
 
 export default function Dashboard() {
@@ -13,14 +15,22 @@ export default function Dashboard() {
   useEffect(() => {
       const fetchTransactions = async () => {
         try {
+          const userDetails = await AsyncStorage.getItem('userDetails');
+          Toast.show({
+              type: 'success',
+              text1: `${userDetails?.role} Analytics`,
+              text2: userDetails?.role === USER_ROLE.PSP ? "You have 20 merchants connected"  : "You've made 35 API calls this week" ,
+          });
+
+
           const res = await getTransactions();
-          console.log('Xxxxxx++++++)))API Response:', res?.data?.result); // 👈 log this
           setTransactions(res?.data?.result); 
+
   
         } catch (err) {
           Toast.show({
               type: 'error',
-              text1: 'Signup Failed',
+              text1: 'Transaction Fetching Failed',
               text2: err.response?.data?.message || err.message || 'Something went wrong',
           });
         } 
@@ -35,19 +45,18 @@ export default function Dashboard() {
       <Text>Dashboard</Text>
 
        <View 
-      //  style={styles.container}
        >
-        {transactions}
         <FlatList
           data={transactions}
           keyExtractor={(trxn) => trxn?.id}
+          contentContainerStyle={styles.listContainer}
           renderItem={({ item }) => (
-            <View>
-              <Text>{item.amount}</Text>
+            <View style={styles.card}>
+              <Text style={styles.amount}>{item.amount}</Text>
               <Text>{item.currency}</Text>
-              <Text>{item.sender?.email}</Text>
-              <Text>{item.recipient?.email}</Text>
-              <Text>{new Date(item.timestamp).toLocaleString()}</Text>
+              <Text style={styles.email}>{item.sender?.email}</Text>
+              <Text style={styles.email}>{item.recipient?.email}</Text>
+              <Text style={styles.timestamp}>{new Date(item.timestamp).toLocaleString()}</Text>
             </View>
           )}
         />
@@ -62,3 +71,36 @@ export default function Dashboard() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  listContainer: {
+    padding: 16,
+  },
+  card: {
+    backgroundColor: '#fff',
+    padding: 16,
+    marginBottom: 12,
+    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  amount: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 6,
+    color: '#2a9d8f',
+  },
+  email: {
+    fontSize: 14,
+    color: '#264653',
+    marginBottom: 2,
+  },
+  timestamp: {
+    fontSize: 12,
+    color: '#6c757d',
+    marginTop: 6,
+  },
+});

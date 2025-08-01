@@ -30,8 +30,11 @@ export default function LoginScreen() {
             text2: 'Welcome again',
         });
 
-        const token = response.data.result.token;
+        const token = response.data?.result?.token;
+        const userDetails = response.data?.result;
+        
 
+        AsyncStorage.setItem('userDetails', userDetails);
         AsyncStorage.setItem('authToken', token);
         router.push('/dashboard'); // Navigate to dashboard after successful login
         
